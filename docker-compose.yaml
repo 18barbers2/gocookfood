@@ -1,0 +1,22 @@
+services:
+    db:
+        image: postgres:17
+        environment:
+            POSTGRES_USER: gocook
+            POSTGRES_PASSWORD: gocook
+            POSTGRES_DB: gocookfood
+        ports:
+            - '5432:5432'
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U gocook -d gocookfood']
+            interval: 5s
+            retries: 5
+    redis:
+        image: redis:7
+        ports:
+            - '6379:6379'
+
+volumes:
+    pgdata:
