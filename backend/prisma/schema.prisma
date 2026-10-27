@@ -13,10 +13,69 @@ datasource db {
 }
 
 model Recipe {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   title       String
+  description String?
   sourceUrl   String?
-  ingredients String[]
+  imageUrl    String?
+  ingredients Ingredient[]
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
   steps       String[]
-  createdAt   DateTime @default(now())
+  createdAt   DateTime     @default(now())
+  authorId    Int
+  cookLogs    CookLog[]
+  updatedAt   DateTime     @updatedAt
+
+  @@index([authorId])
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  username      String         @unique
+  passwordHash  String
+  recipes       Recipe[]
+  logs          CookLog[]
+  refreshTokens RefreshToken[]
+  createdAt     DateTime       @default(now())
+}
+
+model Ingredient {
+  id              Int     @id @default(autoincrement())
+  ingredientOrder Int
+  name            String
+  quantity        String?
+  unit            String?
+  recipe          Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId        Int
+
+  @@index([recipeId])
+}
+
+model CookLog {
+  id        Int      @id @default(autoincrement())
+  rating    Int?
+  notes     String?
+  photoUrl  String?
+  cookedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  Int
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+
 }
