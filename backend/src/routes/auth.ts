@@ -1,6 +1,5 @@
 import argon2 from 'argon2';
 import prisma from '../lib/prisma.js';
-
 import { Router } from 'express';
 
 const router = Router();
