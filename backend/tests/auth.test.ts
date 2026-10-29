@@ -58,4 +58,14 @@ describe('POST /auth/register', () => {
         });
         expect(res.status).toBe(400);
     });
+
+    it('should not return password hash', async () => {
+        const res = await request(app).post('/auth/register').send({
+            email: 'samrocks123321@gmail.com',
+            username: 'samrocks101',
+            password: 'password123',
+        });
+        expect(res.status).toBe(201);
+        expect(res.body).not.toHaveProperty('passwordHash');
+    });
 });
