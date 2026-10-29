@@ -4,7 +4,7 @@ import { Router } from 'express';
 
 const router = Router();
 
-router.post('/auth/register', async (req, res) => {
+router.post('/register', async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
