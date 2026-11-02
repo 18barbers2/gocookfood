@@ -78,7 +78,7 @@ describe('POST /auth/register', () => {
         expect(res.body).not.toHaveProperty('passwordHash');
     });
 
-    it('stores a hashed password not plain test', async () => {
+    it('stores a hashed password not plain text', async () => {
         await register();
         const user = await prisma.user.findUnique({ where: { email: validUser.email } });
         expect(user).not.toBeNull();
