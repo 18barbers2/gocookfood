@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
+import prisma from '../src/lib/prisma.js';
 
 type UserOverrides = {
     email?: string | undefined;
@@ -75,5 +76,11 @@ describe('POST /auth/register', () => {
         expect(res.body.username).toBe(validUser.username);
         expect(res.body.id).toBeDefined();
         expect(res.body).not.toHaveProperty('passwordHash');
+    });
+
+    it('stores a hashed password not plain test', async () => {
+        await register();
+        const user = await prisma.user.findUnique({ where: { email: validUser.email } });
+        expect(user?.passwordHash).not.toEqual(validUser.password);
     });
 });
