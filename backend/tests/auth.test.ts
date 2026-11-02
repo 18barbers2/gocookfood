@@ -24,44 +24,56 @@ describe('POST /auth/register', () => {
 
     it('registers a user and returns 201', async () => {
         const res = await register();
+        expect(res.body.email).toBe(validUser.email);
+        expect(res.body.username).toBe(validUser.username);
+        expect(res.body.id).toBeDefined();
         expect(res.status).toBe(201);
     });
 
     it('returns 409 when email is already taken', async () => {
         await register();
         const res = await register({ username: 'anotherusername' });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(409);
     });
 
     it('returns 409 when username is already taken', async () => {
         await register();
         const res = await register({ email: 'differentemail@test.com' });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(409);
     });
 
     it('returns 400 when password is too short', async () => {
         const res = await register({ password: '123' });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
     it('returns 400 when the email is missing', async () => {
         const res = await register({ email: undefined });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
     it('returns 400 when the username is missing', async () => {
         const res = await register({ username: undefined });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
     it('returns 400 when the password is missing', async () => {
         const res = await register({ password: undefined });
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
     it('does not return the password hash', async () => {
         const res = await register();
         expect(res.status).toBe(201);
+        expect(res.body.email).toBe(validUser.email);
+        expect(res.body.username).toBe(validUser.username);
+        expect(res.body.id).toBeDefined();
         expect(res.body).not.toHaveProperty('passwordHash');
     });
 });
