@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
 
+type UserOverrides = {
+    email?: string | undefined;
+    username?: string | undefined;
+    password?: string | undefined;
+};
+
 describe('POST /auth/register', () => {
     const validUser = {
         email: 'sam@test.com',
@@ -10,7 +16,7 @@ describe('POST /auth/register', () => {
     };
 
     // Registers a user with the option of override any attribute
-    function register(overrides = {}) {
+    function register(overrides: UserOverrides = {}) {
         return request(app)
             .post('/auth/register')
             .send({ ...validUser, ...overrides });
