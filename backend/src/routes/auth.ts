@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js';
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../lib/config.js';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -55,6 +56,7 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
+    const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
     const email = req.body.email;
     const password = req.body.password;
 
@@ -68,23 +70,37 @@ router.post('/login', async (req, res) => {
         });
 
         if (user && (await argon2.verify(user.passwordHash, password))) {
-            // create access token with jwst.sign
-
-            const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m' });
+            // create access token with jwt.sign
+            const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m' });
 
             // create refresh token
-            return res.status(200);
+            const refreshToken = crypto.randomBytes(32).toString('hex');
+
+            // hash refreshToken
+            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+            // create refreshToken in datbase with tokenHash
+            await prisma.refreshToken.create({
+                data: {
+                    tokenHash,
+                    userId: user.id,
+                    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS), // 7 days,
+                },
+            });
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict',
+                maxAge: REFRESH_TOKEN_TTL_MS,
+            });
+
+            return res.status(200).json({ accessToken });
         }
         return res.status(401).json({ error: 'Incorrect email or password' });
     } catch (error) {
         return res.status(500).json({ error: 'Something went wrong' });
     }
-
-    // check that username exists
-
-    // check that hashed password decoded equals password
-
-    // return error if either
 });
 
 export default router;
