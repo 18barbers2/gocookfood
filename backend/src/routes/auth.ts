@@ -52,4 +52,31 @@ router.post('/register', async (req, res) => {
     }
 });
 
+router.post('/login', async (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    const user = await prisma.user.findUnique({
+        where: { email },
+    });
+
+    try {
+        if (user && (await argon2.verify(user.passwordHash, password))) {
+            // create access token with jwst.sign
+
+            // create refresh token
+            return res.status(200);
+        }
+        return res.status(401).json({ error: 'Incorrect email or password' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+
+    // check that username exists
+
+    // check that hashed password decoded equals password
+
+    // return error if either
+});
+
 export default router;
