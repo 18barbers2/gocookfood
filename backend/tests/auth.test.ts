@@ -9,20 +9,20 @@ type UserOverrides = {
     password?: string | undefined;
 };
 
+const validUser = {
+    email: 'sam@test.com',
+    username: 'samtheman',
+    password: 'password123',
+};
+
+// Registers a user with the option of override any attribute
+function register(overrides: UserOverrides = {}) {
+    return request(app)
+        .post('/auth/register')
+        .send({ ...validUser, ...overrides });
+}
+
 describe('POST /auth/register', () => {
-    const validUser = {
-        email: 'sam@test.com',
-        username: 'samtheman',
-        password: 'password123',
-    };
-
-    // Registers a user with the option of override any attribute
-    function register(overrides: UserOverrides = {}) {
-        return request(app)
-            .post('/auth/register')
-            .send({ ...validUser, ...overrides });
-    }
-
     it('registers a user and returns 201', async () => {
         const res = await register();
         expect(res.body.email).toBe(validUser.email);
@@ -83,5 +83,17 @@ describe('POST /auth/register', () => {
         const user = await prisma.user.findUnique({ where: { email: validUser.email } });
         expect(user).not.toBeNull();
         expect(user?.passwordHash).not.toEqual(validUser.password);
+    });
+});
+
+describe('POST /auth/login', () => {
+    it('registers a user, logs in and returns status 200', async () => {
+        await register();
+        const res = await request(app)
+            .post('/auth/login')
+            .send({ ...validUser });
+
+        expect(res.status).toBe(200);
+        expect(res.body.accessToken).not.toBeUndefined();
     });
 });
