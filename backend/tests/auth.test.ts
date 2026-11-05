@@ -94,6 +94,6 @@ describe('POST /auth/login', () => {
             .send({ ...validUser });
 
         expect(res.status).toBe(200);
-        expect(res.body.accessToken).not.toBeUndefined();
+        expect(res.body.accessToken).toBeDefined();
     });
 });
