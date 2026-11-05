@@ -118,4 +118,28 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/refresh', async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({ error: 'Refresh does not exist' });
+        }
+
+        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        const result = prisma.refreshToken.findUnique({
+            where: {
+                tokenHash,
+            },
+        });
+
+        if (!result) {
+            return res.status(401).json({ error: 'Invalid token hash' });
+        }
+    } catch (error) {
+        return res.status(401).json({ error });
+    }
+});
+
 export default router;
