@@ -24,21 +24,20 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'Password too short' });
     }
 
-    // If email or user already exists return 409 status
-    if (
-        await prisma.user.findFirst({
-            where: {
-                OR: [{ email }, { username }],
-            },
-        })
-    ) {
-        return res.status(409).json({ error: 'Email or username already taken' });
-    }
-
-    // use argon2 to hash the password
-    const passwordHash = await argon2.hash(password);
-
     try {
+        // If email or user already exists return 409 status
+        if (
+            await prisma.user.findFirst({
+                where: {
+                    OR: [{ email }, { username }],
+                },
+            })
+        ) {
+            return res.status(409).json({ error: 'Email or username already taken' });
+        }
+
+        // use argon2 to hash the password
+        const passwordHash = await argon2.hash(password);
         const created = await prisma.user.create({
             data: {
                 email: email,
