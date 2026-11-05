@@ -7,6 +7,10 @@ import crypto from 'crypto';
 
 const router = Router();
 
+// Created once when the file loads, a hash of a throwaway password.
+// Used so failed logins take the same time whether or not the email exists.
+const DUMMY_HASH = await argon2.hash('dummy-password-for-timing');
+
 router.post('/register', async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
@@ -69,36 +73,39 @@ router.post('/login', async (req, res) => {
             where: { email },
         });
 
-        if (user && (await argon2.verify(user.passwordHash, password))) {
-            // create access token with jwt.sign
-            const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m' });
+        // Always run verify, against the dummy hash when there's no user
+        const valid = await argon2.verify(user?.passwordHash ?? DUMMY_HASH, password);
 
-            // create refresh token
-            const refreshToken = crypto.randomBytes(32).toString('hex');
-
-            // hash refreshToken
-            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
-            // create refreshToken in datbase with tokenHash
-            await prisma.refreshToken.create({
-                data: {
-                    tokenHash,
-                    userId: user.id,
-                    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS), // 7 days,
-                },
-            });
-
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: REFRESH_TOKEN_TTL_MS,
-                path: '/auth',
-            });
-
-            return res.status(200).json({ accessToken });
+        if (!user || !valid) {
+            return res.status(401).json({ error: 'Incorrect email or password' });
         }
-        return res.status(401).json({ error: 'Incorrect email or password' });
+
+        // create access token with jwt.sign
+        const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m' });
+
+        // create refresh token
+        const refreshToken = crypto.randomBytes(32).toString('hex');
+
+        // hash refreshToken
+        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        // create refreshToken in datbase with tokenHash
+        await prisma.refreshToken.create({
+            data: {
+                tokenHash,
+                userId: user.id,
+                expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS), // 7 days,
+            },
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: REFRESH_TOKEN_TTL_MS,
+            path: '/auth',
+        });
+        return res.status(200).json({ accessToken });
     } catch (error) {
         return res.status(500).json({ error: 'Something went wrong' });
     }
