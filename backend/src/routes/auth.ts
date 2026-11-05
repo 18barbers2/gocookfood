@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
 import prisma from '../lib/prisma.js';
-import { Router } from 'express';
+import { Router, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../lib/config.js';
 import crypto from 'crypto';
@@ -13,6 +13,36 @@ const DUMMY_HASH = await argon2.hash('dummy-password-for-timing');
 
 // Create once for the refresh token
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+async function issueTokens(res: Response, userId: number): Promise<string> {
+    // create access token with jwt.sign
+    const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '15m' });
+
+    // create refresh token
+    const refreshToken = crypto.randomBytes(32).toString('hex');
+
+    // hash refreshToken
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+    // create refreshToken in database with tokenHash
+    await prisma.refreshToken.create({
+        data: {
+            tokenHash,
+            userId,
+            expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS), // 7 days,
+        },
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: REFRESH_TOKEN_TTL_MS,
+        path: '/auth',
+    });
+
+    return accessToken;
+}
 
 router.post('/register', async (req, res) => {
     const email = req.body.email;
@@ -81,31 +111,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Incorrect email or password' });
         }
 
-        // create access token with jwt.sign
-        const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '15m' });
-
-        // create refresh token
-        const refreshToken = crypto.randomBytes(32).toString('hex');
-
-        // hash refreshToken
-        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
-        // create refreshToken in datbase with tokenHash
-        await prisma.refreshToken.create({
-            data: {
-                tokenHash,
-                userId: user.id,
-                expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS), // 7 days,
-            },
-        });
-
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: REFRESH_TOKEN_TTL_MS,
-            path: '/auth',
-        });
+        const accessToken = await issueTokens(res, user.id);
         return res.status(200).json({ accessToken });
     } catch (error) {
         return res.status(500).json({ error: 'Something went wrong' });
