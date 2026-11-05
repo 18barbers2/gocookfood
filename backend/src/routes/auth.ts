@@ -157,7 +157,8 @@ router.post('/refresh', async (req, res) => {
 
         // respond with 200
     } catch (error) {
-        return res.status(500).json({ error });
+        console.log(error);
+        return res.status(500).json({ error: 'Something went wrong' });
     }
 });
 
