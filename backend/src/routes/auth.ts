@@ -44,6 +44,10 @@ async function issueTokens(res: Response, userId: number): Promise<string> {
     return accessToken;
 }
 
+function clearRefreshTokenCookie(res: Response) {
+    res.clearCookie('refreshToken', { path: '/auth' });
+}
+
 router.post('/register', async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
@@ -136,14 +140,14 @@ router.post('/refresh', async (req, res) => {
 
         if (!result) {
             // if cookie doesnt exist in db then clear it
-            res.clearCookie('refreshToken', { path: '/auth' });
+            clearRefreshTokenCookie(res);
             return res.status(401).json({ error: 'Invalid token hash' });
         }
 
         if (result.expiresAt < new Date()) {
             // if expired, delete it, clear the cookie, and return 401
             await prisma.refreshToken.delete({ where: { tokenHash } });
-            res.clearCookie('refreshToken', { path: '/auth' });
+            clearRefreshTokenCookie(res);
             return res.status(401).json({ error: 'Refresh token is expired' });
         }
 
