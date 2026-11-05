@@ -111,5 +111,6 @@ describe('POST /auth/login', () => {
             .post('/auth/login')
             .send({ ...validUser, email: 'unknownemail@test.com' });
         expect(res.status).toBe(401);
+        expect(res.headers['set-cookie']).toBeUndefined();
     });
 });
