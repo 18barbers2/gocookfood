@@ -96,4 +96,12 @@ describe('POST /auth/login', () => {
         expect(res.status).toBe(200);
         expect(res.body.accessToken).toBeDefined();
     });
+
+    it('logs in with wrong password and returns status 401', async () => {
+        await register();
+        const res = await request(app)
+            .post('/auth/login')
+            .send({ ...validUser, password: 'wrongpassword123' });
+        expect(res.status).toBe(401);
+    });
 });
