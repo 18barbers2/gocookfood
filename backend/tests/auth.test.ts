@@ -3,6 +3,8 @@ import request from 'supertest';
 import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
 
+// `| undefined` is required because tsconfig has exactOptionalPropertyTypes on,
+// and the missing-field tests pass undefined explicitly.
 type UserOverrides = {
     email?: string | undefined;
     username?: string | undefined;
@@ -15,7 +17,7 @@ const validUser = {
     password: 'password123',
 };
 
-// Registers a user with the option of override any attribute
+// Registers validUser, with any fields replaced by `overrides`.
 function register(overrides: UserOverrides = {}) {
     return request(app)
         .post('/auth/register')
@@ -110,6 +112,8 @@ describe('POST /auth/login', () => {
             .post('/auth/login')
             .send({ ...validUser, email: 'unknownemail@test.com' });
         expect(res.status).toBe(401);
+
+        // A failed login must not create a session
         expect(res.headers['set-cookie']).toBeUndefined();
     });
 });
