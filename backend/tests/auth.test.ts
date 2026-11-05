@@ -104,4 +104,12 @@ describe('POST /auth/login', () => {
             .send({ ...validUser, password: 'wrongpassword123' });
         expect(res.status).toBe(401);
     });
+
+    it('logs in with invalid email and returns status 401', async () => {
+        await register();
+        const res = await request(app)
+            .post('/auth/login')
+            .send({ ...validUser, email: 'unknownemail@test.com' });
+        expect(res.status).toBe(401);
+    });
 });
