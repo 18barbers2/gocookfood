@@ -128,7 +128,7 @@ router.post('/refresh', async (req, res) => {
 
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-        const result = prisma.refreshToken.findUnique({
+        const result = await prisma.refreshToken.findUnique({
             where: {
                 tokenHash,
             },
@@ -137,6 +137,19 @@ router.post('/refresh', async (req, res) => {
         if (!result) {
             return res.status(401).json({ error: 'Invalid token hash' });
         }
+
+        if (result.expiresAt < new Date()) {
+            // if expired, delete it, clear the cookie, and return 401
+            await prisma.refreshToken.delete({ where: { tokenHash } });
+            res.clearCookie('refreshToken', { path: '/auth' });
+            return res.status(401).json({ error: 'Refresh token is expired' });
+        }
+
+        // rotate
+
+        // issue new tokens
+
+        // respond with 200
     } catch (error) {
         return res.status(401).json({ error });
     }
