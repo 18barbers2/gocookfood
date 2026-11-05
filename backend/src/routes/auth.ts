@@ -135,6 +135,8 @@ router.post('/refresh', async (req, res) => {
         });
 
         if (!result) {
+            // if cookie doesnt exist in db then clear it
+            res.clearCookie('refreshToken', { path: '/auth' });
             return res.status(401).json({ error: 'Invalid token hash' });
         }
 
@@ -151,7 +153,7 @@ router.post('/refresh', async (req, res) => {
 
         // respond with 200
     } catch (error) {
-        return res.status(401).json({ error });
+        return res.status(500).json({ error });
     }
 });
 
