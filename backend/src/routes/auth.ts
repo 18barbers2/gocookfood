@@ -11,6 +11,9 @@ const router = Router();
 // Used so failed logins take the same time whether or not the email exists.
 const DUMMY_HASH = await argon2.hash('dummy-password-for-timing');
 
+// Create once for the refresh token
+const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 router.post('/register', async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
@@ -59,7 +62,6 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
     const email = req.body.email;
     const password = req.body.password;
 
