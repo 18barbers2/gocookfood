@@ -93,6 +93,7 @@ router.post('/login', async (req, res) => {
                 secure: true,
                 sameSite: 'strict',
                 maxAge: REFRESH_TOKEN_TTL_MS,
+                path: '/auth',
             });
 
             return res.status(200).json({ accessToken });
