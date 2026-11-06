@@ -151,11 +151,12 @@ router.post('/refresh', async (req, res) => {
             return res.status(401).json({ error: 'Refresh token is expired' });
         }
 
-        // rotate
+        // each refreshToken works only once
+        await prisma.refreshToken.delete({ where: { id: result.id } });
 
-        // issue new tokens
+        const accessToken = await issueTokens(res, result.userId);
 
-        // respond with 200
+        return res.status(200).json({ accessToken });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: 'Something went wrong' });
