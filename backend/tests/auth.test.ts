@@ -138,5 +138,14 @@ describe('POST /auth/login', () => {
             expect(res.status).toBe(200);
             expect(res.body.accessToken).toBeDefined();
         });
+
+        it('returns 401 when a refresh token is reused', async () => {
+            const cookie = await loginAndGetCookie();
+
+            await request(app).post('/auth/refresh').set('Cookie', cookie);
+            const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
+
+            expect(res.status).toBe(401);
+        });
     });
 });
