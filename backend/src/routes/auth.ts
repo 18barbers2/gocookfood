@@ -15,16 +15,12 @@ const DUMMY_HASH = await argon2.hash('dummy-password-for-timing');
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 async function issueTokens(res: Response, userId: number): Promise<string> {
-    // create access token with jwt.sign
     const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '15m' });
 
-    // create refresh token
     const refreshToken = crypto.randomBytes(32).toString('hex');
 
-    // hash refreshToken
     const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-    // create refreshToken in database with tokenHash
     await prisma.refreshToken.create({
         data: {
             tokenHash,
@@ -91,6 +87,7 @@ router.post('/register', async (req, res) => {
 
         return res.status(201).json(created);
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ error: 'Unable to create user' });
     }
 });
@@ -118,6 +115,7 @@ router.post('/login', async (req, res) => {
         const accessToken = await issueTokens(res, user.id);
         return res.status(200).json({ accessToken });
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ error: 'Something went wrong' });
     }
 });
@@ -127,7 +125,7 @@ router.post('/refresh', async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
         if (!refreshToken) {
-            return res.status(401).json({ error: 'Refresh does not exist' });
+            return res.status(401).json({ error: 'Invalid or expired session' });
         }
 
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
@@ -141,14 +139,14 @@ router.post('/refresh', async (req, res) => {
         if (!result) {
             // if cookie doesnt exist in db then clear it
             clearRefreshTokenCookie(res);
-            return res.status(401).json({ error: 'Invalid token hash' });
+            return res.status(401).json({ error: 'Invalid or expired session' });
         }
 
         if (result.expiresAt < new Date()) {
             // if expired, delete it, clear the cookie, and return 401
             await prisma.refreshToken.delete({ where: { tokenHash } });
             clearRefreshTokenCookie(res);
-            return res.status(401).json({ error: 'Refresh token is expired' });
+            return res.status(401).json({ error: 'Invalid or expired session' });
         }
 
         // each refreshToken works only once
@@ -158,7 +156,7 @@ router.post('/refresh', async (req, res) => {
 
         return res.status(200).json({ accessToken });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ error: 'Something went wrong' });
     }
 });
