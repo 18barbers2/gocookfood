@@ -164,4 +164,20 @@ router.post('/refresh', async (req, res) => {
     }
 });
 
+router.post('/logout', async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            await prisma.refreshToken.deleteMany({ where: { tokenHash } });
+        }
+
+        clearRefreshTokenCookie(res);
+        return res.sendStatus(204);
+    } catch (error) {
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 export default router;
