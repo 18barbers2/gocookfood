@@ -161,10 +161,9 @@ describe('POST /auth/refresh', () => {
     it('replaces the database row', async () => {
         const loginCookie = await loginAndGetCookie();
 
-        const res = await request(app).post('/auth/refresh').set('Cookie', loginCookie);
+        await request(app).post('/auth/refresh').set('Cookie', loginCookie);
 
-        const countTokens = await prisma.refreshToken.count({ where: {} });
-        expect(res.status).toBe(200);
-        expect(res.headers['set-cookie']).toBeDefined();
+        const count = await prisma.refreshToken.count();
+        expect(count).toBe(1);
     });
 });
