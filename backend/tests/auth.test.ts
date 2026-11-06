@@ -166,4 +166,22 @@ describe('POST /auth/refresh', () => {
         const count = await prisma.refreshToken.count();
         expect(count).toBe(1);
     });
+
+    it('returns 401 when there is not cookie', async () => {
+        await loginAndGetCookie();
+
+        const res = await request(app).post('/auth/refresh');
+
+        expect(res.status).toBe(401);
+    });
+
+    it('returns 401 when the cookie is fake', async () => {
+        await loginAndGetCookie();
+
+        const res = await request(app)
+            .post('/auth/refresh')
+            .set('Cookie', 'refreshToken=thisisnotavalidcookie');
+
+        expect(res.status).toBe(401);
+    });
 });
