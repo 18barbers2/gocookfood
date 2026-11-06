@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
+import crypto from 'crypto';
 
 // `| undefined` is required because tsconfig has exactOptionalPropertyTypes on,
 // and the missing-field tests pass undefined explicitly.
@@ -181,6 +182,24 @@ describe('POST /auth/refresh', () => {
         const res = await request(app)
             .post('/auth/refresh')
             .set('Cookie', 'refreshToken=thisisnotavalidcookie');
+
+        expect(res.status).toBe(401);
+    });
+
+    it('returns 401 when the refresh token is expired', async () => {
+        await register();
+        const user = await prisma.user.findUnique({ where: { email: validUser.email } });
+
+        const token = 'expiredtoken123';
+        await prisma.refreshToken.create({
+            data: {
+                tokenHash: crypto.createHash('sha256').update(token).digest('hex'),
+                userId: user!.id,
+                expiresAt: new Date(Date.now() - 1000), // 1 second ago
+            },
+        });
+
+        const res = await request(app).post('/auth/refresh').set('Cookie', `refreshToken=${token}`);
 
         expect(res.status).toBe(401);
     });
