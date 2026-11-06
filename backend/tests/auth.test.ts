@@ -24,6 +24,18 @@ function register(overrides: UserOverrides = {}) {
         .send({ ...validUser, ...overrides });
 }
 
+async function loginAndGetCookie() {
+    await register();
+    const login = await request(app).post('/auth/login').send(validUser);
+    const cookie = login.headers['set-cookie'];
+
+    if (!cookie) {
+        throw new Error('Login did not set a cookie');
+    }
+
+    return cookie;
+}
+
 describe('POST /auth/register', () => {
     it('registers a user and returns 201', async () => {
         const res = await register();
@@ -115,5 +127,16 @@ describe('POST /auth/login', () => {
 
         // A failed login must not create a session
         expect(res.headers['set-cookie']).toBeUndefined();
+    });
+
+    describe('POST /auth/refresh', () => {
+        it('returns 200 and a new access token when the cookie is valid', async () => {
+            const cookie = await loginAndGetCookie();
+
+            const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
+
+            expect(res.status).toBe(200);
+            expect(res.body.accessToken).toBeDefined();
+        });
     });
 });
