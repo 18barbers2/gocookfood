@@ -148,7 +148,12 @@ router.post('/refresh', async (req, res) => {
         }
 
         // each refreshToken works only once
-        await prisma.refreshToken.delete({ where: { id: result.id } });
+        const { count } = await prisma.refreshToken.deleteMany({ where: { id: result.id } });
+        if (count === 0) {
+            // Another request already used this token, race condition
+            clearRefreshTokenCookie(res);
+            return res.status(401).json({ error: 'Invalid or expired session' });
+        }
 
         const accessToken = await issueTokens(res, result.userId);
 
