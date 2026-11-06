@@ -167,7 +167,7 @@ describe('POST /auth/refresh', () => {
         expect(count).toBe(1);
     });
 
-    it('returns 401 when there is not cookie', async () => {
+    it('returns 401 when there is no cookie', async () => {
         await loginAndGetCookie();
 
         const res = await request(app).post('/auth/refresh');
