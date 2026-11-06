@@ -128,33 +128,43 @@ describe('POST /auth/login', () => {
         // A failed login must not create a session
         expect(res.headers['set-cookie']).toBeUndefined();
     });
+});
 
-    describe('POST /auth/refresh', () => {
-        it('returns 200 and a new access token when the cookie is valid', async () => {
-            const cookie = await loginAndGetCookie();
+describe('POST /auth/refresh', () => {
+    it('returns 200 and a new access token when the cookie is valid', async () => {
+        const cookie = await loginAndGetCookie();
 
-            const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
+        const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
 
-            expect(res.status).toBe(200);
-            expect(res.body.accessToken).toBeDefined();
-        });
+        expect(res.status).toBe(200);
+        expect(res.body.accessToken).toBeDefined();
+    });
 
-        it('returns 401 when a refresh token is reused', async () => {
-            const cookie = await loginAndGetCookie();
+    it('returns 401 when a refresh token is reused', async () => {
+        const cookie = await loginAndGetCookie();
 
-            await request(app).post('/auth/refresh').set('Cookie', cookie);
-            const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
+        await request(app).post('/auth/refresh').set('Cookie', cookie);
+        const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
 
-            expect(res.status).toBe(401);
-        });
+        expect(res.status).toBe(401);
+    });
 
-        it('sets a new refresh cookie', async () => {
-            const loginCookie = await loginAndGetCookie();
+    it('sets a new refresh cookie', async () => {
+        const loginCookie = await loginAndGetCookie();
 
-            const res = await request(app).post('/auth/refresh').set('Cookie', loginCookie);
+        const res = await request(app).post('/auth/refresh').set('Cookie', loginCookie);
 
-            expect(res.status).toBe(200);
-            expect(res.headers['set-cookie']).toBeDefined();
-        });
+        expect(res.status).toBe(200);
+        expect(res.headers['set-cookie']).toBeDefined();
+    });
+
+    it('replaces the database row', async () => {
+        const loginCookie = await loginAndGetCookie();
+
+        const res = await request(app).post('/auth/refresh').set('Cookie', loginCookie);
+
+        const countTokens = await prisma.refreshToken.count({ where: {} });
+        expect(res.status).toBe(200);
+        expect(res.headers['set-cookie']).toBeDefined();
     });
 });
