@@ -147,5 +147,14 @@ describe('POST /auth/login', () => {
 
             expect(res.status).toBe(401);
         });
+
+        it('sets a new refresh cookie', async () => {
+            const loginCookie = await loginAndGetCookie();
+
+            const res = await request(app).post('/auth/refresh').set('Cookie', loginCookie);
+
+            expect(res.status).toBe(200);
+            expect(res.headers['set-cookie']).toBeDefined();
+        });
     });
 });
