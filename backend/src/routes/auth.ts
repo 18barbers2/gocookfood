@@ -16,9 +16,7 @@ const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 async function issueTokens(res: Response, userId: number): Promise<string> {
     const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '15m' });
-
     const refreshToken = crypto.randomBytes(32).toString('hex');
-
     const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
     await prisma.refreshToken.create({
