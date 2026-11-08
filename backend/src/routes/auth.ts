@@ -4,6 +4,7 @@ import { Router, type Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../lib/config.js';
 import crypto from 'crypto';
+import { requireAuth } from '../middleware/requireAuth.js';
 
 const router = Router();
 
@@ -178,6 +179,33 @@ router.post('/logout', async (req, res) => {
 
         clearRefreshTokenCookie(res);
         return res.sendStatus(204);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+router.get('/me', requireAuth, async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                createdAt: true,
+            },
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        return res.status(200).json(user);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Something went wrong' });
