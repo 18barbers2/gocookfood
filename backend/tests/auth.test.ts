@@ -37,6 +37,13 @@ async function loginAndGetCookie() {
     return cookie;
 }
 
+async function loginAndGetAccessToken() {
+    await register();
+    const login = await request(app).post('/api/auth/login').send(validUser);
+    const token = login.body.accessToken;
+    return token;
+}
+
 describe('POST /api/auth/register', () => {
     it('registers a user and returns 201', async () => {
         const res = await register();
@@ -252,13 +259,11 @@ describe('POST /api/auth/logout', () => {
 
 describe('GET /api/auth/me', () => {
     it('returns the current user when the token is valid', async () => {
-        await register();
-        const login = await request(app).post('/api/auth/login').send(validUser);
-        const token = login.body.accessToken;
+        const token = await loginAndGetAccessToken();
         const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
 
         expect(res.body.email).toBe(validUser.email);
-        expect(res.body).toHaveProperty('passwordHash');
+        expect(res.body).not.toHaveProperty('passwordHash');
         expect(res.status).toBe(200);
     });
 });
