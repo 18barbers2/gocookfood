@@ -208,7 +208,7 @@ describe('POST /auth/refresh', () => {
 describe('POST /auth/logout', () => {
     it('returns 204 when the user is logged in', async () => {
         const cookie = await loginAndGetCookie();
-        const res = await request(app).post('/auth/logout');
+        const res = await request(app).post('/auth/logout').set('Cookie', cookie);
 
         expect(res.status).toBe(204);
     });
