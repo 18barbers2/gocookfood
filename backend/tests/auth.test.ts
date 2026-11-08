@@ -3,6 +3,7 @@ import request from 'supertest';
 import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
 import crypto from 'crypto';
+import { hashToken } from '../src/routes/auth.js';
 
 // `| undefined` is required because tsconfig has exactOptionalPropertyTypes on,
 // and the missing-field tests pass undefined explicitly.
@@ -198,7 +199,7 @@ describe('POST /api/auth/refresh', () => {
         const token = 'expiredtoken123';
         await prisma.refreshToken.create({
             data: {
-                tokenHash: crypto.createHash('sha256').update(token).digest('hex'),
+                tokenHash: hashToken(token),
                 userId: user!.id,
                 expiresAt: new Date(Date.now() - 1000), // 1 second ago
             },
