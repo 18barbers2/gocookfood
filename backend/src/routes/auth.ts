@@ -135,7 +135,6 @@ router.post('/refresh', async (req, res) => {
         });
 
         if (!result) {
-            // if cookie doesnt exist in db then clear it
             clearRefreshTokenCookie(res);
             return res.status(401).json({ error: 'Invalid or expired session' });
         }
