@@ -129,6 +129,11 @@ describe('POST /api/auth/login', () => {
         // A failed login must not create a session
         expect(res.headers['set-cookie']).toBeUndefined();
     });
+
+    it('scopes the refresh cookie to the auth routes', async () => {
+        const cookie = await loginAndGetCookie();
+        expect(String(cookie)).toContain('Path=/api/auth');
+    });
 });
 
 describe('POST /api/auth/refresh', () => {
