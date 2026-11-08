@@ -249,3 +249,16 @@ describe('POST /api/auth/logout', () => {
         expect(res.status).toBe(204);
     });
 });
+
+describe('GET /api/auth/me', () => {
+    it('returns the current user when the token is valid', async () => {
+        await register();
+        const login = await request(app).post('/api/auth/login').send(validUser);
+        const token = login.body.accessToken;
+        const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
+
+        expect(res.body.email).toBe(validUser.email);
+        expect(res.body).toHaveProperty('passwordHash');
+        expect(res.status).toBe(200);
+    });
+});
