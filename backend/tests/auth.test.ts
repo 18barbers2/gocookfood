@@ -234,4 +234,11 @@ describe('POST /auth/logout', () => {
 
         expect(res.status).toBe(401);
     });
+
+    it('returns 204 even without a cookie', async () => {
+        await loginAndGetCookie();
+        const res = await request(app).post('/auth/logout');
+
+        expect(res.status).toBe(204);
+    });
 });
