@@ -176,6 +176,7 @@ router.post('/logout', async (req, res) => {
         clearRefreshTokenCookie(res);
         return res.sendStatus(204);
     } catch (error) {
+        console.error(error);
         return res.status(500).json({ error: 'Something went wrong' });
     }
 });
