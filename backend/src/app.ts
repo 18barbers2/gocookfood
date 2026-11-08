@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 export const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use('/auth', authRouter);
+app.use('/api/auth', authRouter);
 
 // Health check route, confirms server is running
 app.get('/health', (_req, res) => {

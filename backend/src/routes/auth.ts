@@ -32,14 +32,14 @@ async function issueTokens(res: Response, userId: number): Promise<string> {
         secure: true,
         sameSite: 'strict',
         maxAge: REFRESH_TOKEN_TTL_MS,
-        path: '/auth',
+        path: '/api/auth',
     });
 
     return accessToken;
 }
 
 function clearRefreshTokenCookie(res: Response) {
-    res.clearCookie('refreshToken', { path: '/auth' });
+    res.clearCookie('refreshToken', { path: '/api/auth' });
 }
 
 router.post('/register', async (req, res) => {
