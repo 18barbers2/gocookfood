@@ -266,4 +266,20 @@ describe('GET /api/auth/me', () => {
         expect(res.body).not.toHaveProperty('passwordHash');
         expect(res.status).toBe(200);
     });
+    it('returns 401 when there is no authorization header', async () => {
+        const res = await request(app).get('/api/auth/me');
+
+        expect(res.status).toBe(401);
+    });
+
+    it('returns 401 when the token is invalid', async () => {
+        const fakeToken = 'thisisafaketoken';
+        const res = await request(app)
+            .get('/api/auth/me')
+            .set('Authorization', `Bearer ${fakeToken}`);
+
+        expect(res.status).toBe(401);
+        expect(res.body.error).toBeDefined();
+        expect(res.body.email).not.toBeDefined();
+    });
 });
