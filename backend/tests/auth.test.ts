@@ -212,4 +212,16 @@ describe('POST /auth/logout', () => {
 
         expect(res.status).toBe(204);
     });
+    it('deletes the refresh token row', async () => {
+        const cookie = await loginAndGetCookie();
+
+        // checks that there is 1 refreshToken before logout
+        expect(await prisma.refreshToken.count()).toBe(1);
+
+        await request(app).post('/auth/logout').set('Cookie', cookie);
+
+        const count = await prisma.refreshToken.count();
+
+        expect(count).toBe(0);
+    });
 });
