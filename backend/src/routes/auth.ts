@@ -17,7 +17,7 @@ const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 async function issueTokens(res: Response, userId: number): Promise<string> {
     const accessToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = hashToken(refreshToken);
 
     await prisma.refreshToken.create({
         data: {
@@ -40,6 +40,10 @@ async function issueTokens(res: Response, userId: number): Promise<string> {
 
 function clearRefreshTokenCookie(res: Response) {
     res.clearCookie('refreshToken', { path: '/api/auth' });
+}
+
+export function hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 router.post('/register', async (req, res) => {
@@ -126,7 +130,7 @@ router.post('/refresh', async (req, res) => {
             return res.status(401).json({ error: 'Invalid or expired session' });
         }
 
-        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+        const tokenHash = hashToken(refreshToken);
 
         const result = await prisma.refreshToken.findUnique({
             where: {
@@ -168,7 +172,7 @@ router.post('/logout', async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
         if (refreshToken) {
-            const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+            const tokenHash = hashToken(refreshToken);
             await prisma.refreshToken.deleteMany({ where: { tokenHash } });
         }
 
