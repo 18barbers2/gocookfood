@@ -204,3 +204,12 @@ describe('POST /auth/refresh', () => {
         expect(res.status).toBe(401);
     });
 });
+
+describe('POST /auth/logout', () => {
+    it('returns 204 when the user is logged in', async () => {
+        const cookie = await loginAndGetCookie();
+        const res = await request(app).post('/auth/logout');
+
+        expect(res.status).toBe(204);
+    });
+});
