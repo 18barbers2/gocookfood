@@ -224,4 +224,14 @@ describe('POST /auth/logout', () => {
 
         expect(count).toBe(0);
     });
+
+    it('prevents the old cookie from refreshing after logout', async () => {
+        const cookie = await loginAndGetCookie();
+
+        await request(app).post('/auth/logout').set('Cookie', cookie);
+
+        const res = await request(app).post('/auth/refresh').set('Cookie', cookie);
+
+        expect(res.status).toBe(401);
+    });
 });
