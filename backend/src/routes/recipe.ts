@@ -22,13 +22,20 @@ router.post('/recipe/create', requireAuth, async (req, res) => {
         return res.status(403).json({ error: 'Must contain at least 1 ingredient' });
     }
 
-    const created = await prisma.recipe.create({
-        data: {
-            title,
-            description: description ?? null,
-            authorId: req.user.id,
-            steps: steps ?? null,
-            ingredients: ingredients || null,
-        },
-    });
+    try {
+        const created = await prisma.recipe.create({
+            data: {
+                title,
+                description: description ?? null,
+                authorId: req.user.id,
+                steps: steps ?? null,
+                ingredients: ingredients || null,
+            },
+            select: {
+                title: true,
+                author: true,
+                createdAt: true,
+            },
+        });
+    } catch (error) {}
 });
