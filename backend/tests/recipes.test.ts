@@ -22,11 +22,11 @@ const validRecipe = {
     ],
 };
 
-describe('POST /api/recipe/create', () => {
+describe('POST /api/recipes', () => {
     it('returns 201 when recipe is created', async () => {
         const token = await loginAndGetAccessToken();
         const res = await request(app)
-            .post('/api/recipe/create')
+            .post('/api/recipes')
             .send(validRecipe)
             .set('Authorization', `Bearer ${token}`);
 
