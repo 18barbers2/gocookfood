@@ -10,7 +10,7 @@ router.post('/recipe/create', requireAuth, async (req, res) => {
     const createdById = req.user?.id;
 
     if (!req.user) {
-        return res.status(403).json({ error: 'Unauthorized' });
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
     if (!title || title.length < 3) {
