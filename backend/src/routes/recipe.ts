@@ -7,7 +7,8 @@ const router = Router();
 router.post('/recipe/create', requireAuth, async (req, res) => {
     const title = req.body.recipeTitle;
     const description = req.body.description;
-    const createdById = req.user?.id;
+    const steps = req.body.steps;
+    const ingredients = req.body.ingredients;
 
     if (!req.user) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -17,11 +18,17 @@ router.post('/recipe/create', requireAuth, async (req, res) => {
         return res.status(403).json({ error: 'Title too short (must be > 3 characters)' });
     }
 
+    if (!ingredients) {
+        return res.status(403).json({ error: 'Must contain at least 1 ingredient' });
+    }
+
     const created = await prisma.recipe.create({
         data: {
             title,
-            description,
+            description: description ?? null,
             authorId: req.user.id,
+            steps: steps ?? null,
+            ingredients: ingredients || null,
         },
     });
 });
