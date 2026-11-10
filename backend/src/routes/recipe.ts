@@ -15,11 +15,11 @@ router.post('/create', requireAuth, async (req, res) => {
     }
 
     if (!title || title.length < 3) {
-        return res.status(403).json({ error: 'Title too short (must be > 3 characters)' });
+        return res.status(400).json({ error: 'Title too short (must be > 3 characters)' });
     }
 
     if (!Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(403).json({ error: 'Must contain at least 1 ingredient' });
+        return res.status(400).json({ error: 'Must contain at least 1 ingredient' });
     }
 
     try {
