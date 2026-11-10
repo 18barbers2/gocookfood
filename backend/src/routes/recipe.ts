@@ -1,7 +1,6 @@
 import prisma from '../lib/prisma.js';
 import { Router, type Response } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { Ingredient } from '../generated/prisma/client.js';
 
 const router = Router();
 
