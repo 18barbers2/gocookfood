@@ -37,7 +37,7 @@ async function loginAndGetCookie() {
     return cookie;
 }
 
-async function loginAndGetAccessToken() {
+export async function loginAndGetAccessToken() {
     await register();
     const login = await request(app).post('/api/auth/login').send(validUser);
     const token = login.body.accessToken;
