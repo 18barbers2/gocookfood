@@ -28,7 +28,7 @@ router.post('/create', requireAuth, async (req, res) => {
                 title,
                 description: description ?? null,
                 authorId: req.user.id,
-                steps: steps ?? null,
+                steps: steps ?? [],
                 ingredients: {
                     create: ingredients.map(
                         (ing: { name: string; quantity?: string; unit?: string }, i: number) => ({
