@@ -41,6 +41,7 @@ router.post('/', requireAuth, async (req, res) => {
                 },
             },
             select: {
+                id: true,
                 title: true,
                 author: { select: { id: true, username: true } },
                 createdAt: true,
