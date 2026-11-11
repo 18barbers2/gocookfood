@@ -3,6 +3,7 @@ import request from 'supertest';
 import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
 import { loginAndGetAccessToken } from './auth.test.js';
+import { validUser } from './auth.test.js';
 
 const validRecipe = {
     title: 'Bacon and Eggs',
@@ -32,5 +33,16 @@ describe('POST /api/recipes', () => {
         console.log(JSON.stringify(res.body, null, 2));
         expect(res.status).toBe(201);
         expect((await prisma.ingredient.count()) === 4);
+    });
+
+    it('sets the author to the logged in user', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await request(app)
+            .post('/api/recipes')
+            .send(validRecipe)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.status).toBe(201);
+        expect(res.body.author.username).toBe(validUser.username);
     });
 });
