@@ -12,7 +12,7 @@ type UserOverrides = {
     password?: string | undefined;
 };
 
-const validUser = {
+export const validUser = {
     email: 'sam@test.com',
     username: 'samtheman',
     password: 'password123',
