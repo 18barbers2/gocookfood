@@ -45,4 +45,32 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(201);
         expect(res.body.author.username).toBe(validUser.username);
     });
+
+    it('doesnt leak password hash in author', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await request(app)
+            .post('/api/recipes')
+            .send(validRecipe)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res.body.author.passwordHash).toBeUndefined();
+    });
+
+    it('saves ingredients in order', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await request(app)
+            .post('/api/recipes')
+            .send(validRecipe)
+            .set('Authorization', `Bearer ${token}`);
+
+        const recipe = await prisma.recipe.findFirst({
+            where: { title: validRecipe.title },
+            select: { ingredients: { orderBy: { ingredientOrder: 'asc' } } },
+        });
+
+        expect(recipe).not.toBeNull();
+        expect(recipe!.ingredients.map((i) => i.name)).toEqual(
+            validRecipe.ingredients.map((i) => i.name)
+        );
+    });
 });
