@@ -52,7 +52,8 @@ describe('POST /api/recipes', () => {
             .send(validRecipe)
             .set('Authorization', `Bearer ${token}`);
 
-        expect(res.body.author.passwordHash).toBeUndefined();
+        expect(res.status).toBe(201);
+        expect(res.body.author).not.toHaveProperty('passwordHash');
     });
 
     it('saves ingredients in order', async () => {
