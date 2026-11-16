@@ -32,7 +32,7 @@ describe('POST /api/recipes', () => {
             .set('Authorization', `Bearer ${token}`);
         console.log(JSON.stringify(res.body, null, 2));
         expect(res.status).toBe(201);
-        expect((await prisma.ingredient.count()) === 4);
+        expect(await prisma.ingredient.count()).toBe(4);
     });
 
     it('sets the author to the logged in user', async () => {
