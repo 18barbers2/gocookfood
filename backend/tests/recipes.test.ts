@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
-import { loginAndGetAccessToken } from './auth.test.js';
-import { validUser } from './auth.test.js';
+import { validUser, loginAndGetAccessToken } from './helpers.js';
 
 const validRecipe = {
     title: 'Bacon and Eggs',
