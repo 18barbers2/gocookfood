@@ -75,7 +75,7 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(400);
     });
 
-    it('returns 401 when user does not exist', async () => {
+    it('returns 401 when garbage token', async () => {
         const token = await loginAndGetAccessToken();
         const res = await request(app)
             .post('/api/recipes')
