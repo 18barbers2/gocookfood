@@ -58,3 +58,10 @@ export async function loginAndGetAccessToken() {
     const token = login.body.accessToken;
     return token;
 }
+
+export function createRecipe(token: string, overrides = {}) {
+    return request(app)
+        .post('/api/recipes')
+        .send({ ...validRecipe, ...overrides })
+        .set('Authorization', `Bearer ${token}`);
+}
