@@ -74,7 +74,7 @@ describe('POST /api/recipes', () => {
         );
     });
 
-    it('returns 401 when title is too short', async () => {
+    it('returns 400 when title is too short', async () => {
         const token = await loginAndGetAccessToken();
         const res = await request(app)
             .post('/api/recipes')
@@ -83,12 +83,21 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(400);
     });
 
-    it('returns 401 when title does not exist', async () => {
+    it('returns 400 when title does not exist', async () => {
         const token = await loginAndGetAccessToken();
         const res = await request(app)
             .post('/api/recipes')
             .send({ ...validRecipe, title: undefined })
             .set('Authorization', `Bearer ${token}`);
         expect(res.status).toBe(400);
+    });
+
+    it('returns 401 when user does not exist', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await request(app)
+            .post('/api/recipes')
+            .send({ ...validRecipe })
+            .set('Authorization', `Bearer token`);
+        expect(res.status).toBe(401);
     });
 });
