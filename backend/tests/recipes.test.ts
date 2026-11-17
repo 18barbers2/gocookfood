@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import prisma from '../src/lib/prisma.js';
 import { validUser, loginAndGetAccessToken, validRecipe, createRecipe } from './helpers.js';
+import request from 'supertest';
+import { app } from '../src/app.js';
 
 describe('POST /api/recipes', () => {
     it('returns 201 when recipe is created', async () => {
@@ -56,6 +58,12 @@ describe('POST /api/recipes', () => {
     it('returns 401 when the token is invalid', async () => {
         await loginAndGetAccessToken();
         const res = await createRecipe('garbagetoken');
+        expect(res.status).toBe(401);
+    });
+
+    it('returns 401 when the token is missing', async () => {
+        await loginAndGetAccessToken();
+        const res = await request(app).post('/api/recipes').send({ validRecipe });
         expect(res.status).toBe(401);
     });
 });
