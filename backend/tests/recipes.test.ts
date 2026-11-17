@@ -1,48 +1,32 @@
 import { describe, it, expect } from 'vitest';
-import request from 'supertest';
-import { app } from '../src/app.js';
 import prisma from '../src/lib/prisma.js';
 import { validUser, loginAndGetAccessToken, validRecipe, createRecipe } from './helpers.js';
 
 describe('POST /api/recipes', () => {
     it('returns 201 when recipe is created', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send(validRecipe)
-            .set('Authorization', `Bearer ${token}`);
+        const res = await createRecipe(token);
         expect(res.status).toBe(201);
         expect(await prisma.ingredient.count()).toBe(4);
     });
 
     it('sets the author to the logged in user', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send(validRecipe)
-            .set('Authorization', `Bearer ${token}`);
-
+        const res = await createRecipe(token);
         expect(res.status).toBe(201);
         expect(res.body.author.username).toBe(validUser.username);
     });
 
     it('doesnt leak password hash in author', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send(validRecipe)
-            .set('Authorization', `Bearer ${token}`);
-
+        const res = await createRecipe(token);
         expect(res.status).toBe(201);
         expect(res.body.author).not.toHaveProperty('passwordHash');
     });
 
     it('saves ingredients in order', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send(validRecipe)
-            .set('Authorization', `Bearer ${token}`);
+        await createRecipe(token);
 
         const recipe = await prisma.recipe.findFirst({
             where: { title: validRecipe.title },
@@ -57,30 +41,21 @@ describe('POST /api/recipes', () => {
 
     it('returns 400 when title is too short', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send({ ...validRecipe, title: 'ab' })
-            .set('Authorization', `Bearer ${token}`);
+        const res = await createRecipe(token, { title: 'ab' });
         expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
     it('returns 400 when title does not exist', async () => {
         const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send({ ...validRecipe, title: undefined })
-            .set('Authorization', `Bearer ${token}`);
+        const res = await createRecipe(token, { title: undefined });
         expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
-    it('returns 401 when garbage token', async () => {
-        const token = await loginAndGetAccessToken();
-        const res = await request(app)
-            .post('/api/recipes')
-            .send({ ...validRecipe })
-            .set('Authorization', `Bearer token`);
+    it('returns 401 when the token is invalid', async () => {
+        await loginAndGetAccessToken();
+        const res = await createRecipe('garbagetoken');
         expect(res.status).toBe(401);
     });
 });
