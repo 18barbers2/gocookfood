@@ -61,6 +61,7 @@ describe('POST /api/recipes', () => {
             .post('/api/recipes')
             .send({ ...validRecipe, title: 'ab' })
             .set('Authorization', `Bearer ${token}`);
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
@@ -70,6 +71,7 @@ describe('POST /api/recipes', () => {
             .post('/api/recipes')
             .send({ ...validRecipe, title: undefined })
             .set('Authorization', `Bearer ${token}`);
+        expect(res.body.error).toBeDefined();
         expect(res.status).toBe(400);
     });
 
