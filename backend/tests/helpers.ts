@@ -15,6 +15,24 @@ export const validUser = {
     password: 'password123',
 };
 
+export const validRecipe = {
+    title: 'Bacon and Eggs',
+    description: 'A classic quick breakfast.',
+    imageUrl: 'https://example.com/bacon-and-eggs.jpg',
+    steps: [
+        'Cook the bacon in a pan over medium heat until crispy, about 8 minutes.',
+        'Move the bacon to a plate, leaving some fat in the pan.',
+        'Crack the eggs into the pan and cook until the whites are set.',
+        'Season with salt and pepper and serve with the bacon.',
+    ],
+    ingredients: [
+        { name: 'bacon', quantity: '4', unit: 'strips' },
+        { name: 'eggs', quantity: '2', unit: null },
+        { name: 'salt', quantity: null, unit: null },
+        { name: 'black pepper', quantity: null, unit: null },
+    ],
+};
+
 // Registers validUser, with any fields replaced by `overrides`.
 export function register(overrides: UserOverrides = {}) {
     return request(app)
