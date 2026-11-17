@@ -11,7 +11,6 @@ describe('POST /api/recipes', () => {
             .post('/api/recipes')
             .send(validRecipe)
             .set('Authorization', `Bearer ${token}`);
-        console.log(JSON.stringify(res.body, null, 2));
         expect(res.status).toBe(201);
         expect(await prisma.ingredient.count()).toBe(4);
     });
