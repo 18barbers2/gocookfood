@@ -107,4 +107,10 @@ describe('POST /api/recipes', () => {
         const res = await createRecipe(token, { title: '      ' });
         expect(res.status).toBe(400);
     });
+
+    it('returns 400 when recipe title is not a string', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { title: 123123 });
+        expect(res.status).toBe(400);
+    });
 });
