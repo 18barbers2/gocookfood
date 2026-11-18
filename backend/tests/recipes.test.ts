@@ -66,4 +66,10 @@ describe('POST /api/recipes', () => {
         const res = await request(app).post('/api/recipes').send({ validRecipe });
         expect(res.status).toBe(401);
     });
+
+    it('returns 400 when the ingredients are missing', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { ...validRecipe, ingredients: [] });
+        expect(res.status).toBe(400);
+    });
 });
