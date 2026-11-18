@@ -63,7 +63,7 @@ describe('POST /api/recipes', () => {
 
     it('returns 401 when the token is missing', async () => {
         await loginAndGetAccessToken();
-        const res = await request(app).post('/api/recipes').send({ validRecipe });
+        const res = await request(app).post('/api/recipes').send(validRecipe);
         expect(res.status).toBe(401);
     });
 
