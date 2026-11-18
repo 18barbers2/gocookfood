@@ -14,47 +14,41 @@ const createRecipeSchema = z.object({
         .array(
             z.object({
                 name: z.string().trim().min(1),
-                quantity: z.string().trim().optional(),
-                unit: z.string().trim().optional(),
+                quantity: z.string().trim().nullish(),
+                unit: z.string().trim().nullish(),
             })
         )
         .min(1),
 });
 
 router.post('/', requireAuth, async (req, res) => {
-    const title = req.body.title;
-    const description = req.body.description;
-    const steps = req.body.steps;
-    const ingredients = req.body.ingredients;
-
     if (!req.user) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!title || title.length < 3) {
-        return res.status(400).json({ error: 'Title too short (must be > 3 characters)' });
+    const parsed = createRecipeSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid recipe', details: parsed.error.issues });
     }
 
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(400).json({ error: 'Must contain at least 1 ingredient' });
-    }
+    const { title, description, imageUrl, steps, ingredients } = parsed.data;
 
     try {
         const created = await prisma.recipe.create({
             data: {
                 title,
                 description: description ?? null,
+                imageUrl: imageUrl ?? null,
                 authorId: req.user.id,
-                steps: steps ?? [],
+                steps: steps,
                 ingredients: {
-                    create: ingredients.map(
-                        (ing: { name: string; quantity?: string; unit?: string }, i: number) => ({
-                            name: ing.name,
-                            quantity: ing.quantity ?? null,
-                            unit: ing.unit ?? null,
-                            ingredientOrder: i,
-                        })
-                    ),
+                    create: ingredients.map((ing, i) => ({
+                        name: ing.name,
+                        quantity: ing.quantity ?? null,
+                        unit: ing.unit ?? null,
+                        ingredientOrder: i,
+                    })),
                 },
             },
             select: {
