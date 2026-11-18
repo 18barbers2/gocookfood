@@ -113,4 +113,16 @@ describe('POST /api/recipes', () => {
         const res = await createRecipe(token, { title: 123123 });
         expect(res.status).toBe(400);
     });
+
+    it('returns 400 when ingredient has no name', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, {
+            ingredients: [
+                {
+                    quantity: '5',
+                },
+            ],
+        });
+        expect(res.status).toBe(400);
+    });
 });
