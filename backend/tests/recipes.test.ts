@@ -72,4 +72,12 @@ describe('POST /api/recipes', () => {
         const res = await createRecipe(token, { ...validRecipe, ingredients: [] });
         expect(res.status).toBe(400);
     });
+
+    it('ignores authorId in the request body and returns 201', async () => {
+        const fakeUserId = 999;
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { authorId: fakeUserId });
+        expect(res.status).toBe(201);
+        expect(res.body.author.username).toBe(validUser.username);
+    });
 });
