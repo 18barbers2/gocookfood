@@ -101,4 +101,10 @@ describe('POST /api/recipes', () => {
             .set('Authorization', `Bearer ${token}`);
         expect(res.status).toBe(201);
     });
+
+    it('returns 400 when recipe title is all whitespace', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { title: '      ' });
+        expect(res.status).toBe(400);
+    });
 });
