@@ -1,8 +1,25 @@
 import prisma from '../lib/prisma.js';
 import { Router } from 'express';
 import { requireAuth } from '../middleware/requireAuth.js';
+import { z } from 'zod';
 
 const router = Router();
+
+const createRecipeSchema = z.object({
+    title: z.string().trim().min(3).max(200),
+    description: z.string().trim().min(1).max(500).optional(),
+    imageUrl: z.url().trim().optional(),
+    steps: z.array(z.string().trim().min(1).max(200)).max(50).default([]),
+    ingredients: z
+        .array(
+            z.object({
+                name: z.string().trim().min(1),
+                quantity: z.string().trim().optional(),
+                unit: z.string().trim().optional(),
+            })
+        )
+        .min(1),
+});
 
 router.post('/', requireAuth, async (req, res) => {
     const title = req.body.title;
