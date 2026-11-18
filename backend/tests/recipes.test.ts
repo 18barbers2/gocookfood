@@ -73,6 +73,18 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(400);
     });
 
+    it('returns 400 when the ingredients are missing', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { ingredients: undefined });
+        expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when the ingredients are not an array', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { ingredients: 'bacon' });
+        expect(res.status).toBe(400);
+    });
+
     it('ignores authorId in the request body and returns 201', async () => {
         const fakeUserId = 999;
         const token = await loginAndGetAccessToken();
