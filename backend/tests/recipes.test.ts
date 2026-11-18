@@ -22,7 +22,6 @@ describe('POST /api/recipes', () => {
     it('doesnt leak password hash in author', async () => {
         const token = await loginAndGetAccessToken();
         const res = await createRecipe(token);
-        console.error(res.error);
         expect(res.status).toBe(201);
         expect(res.body.author).not.toHaveProperty('passwordHash');
     });
