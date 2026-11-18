@@ -67,7 +67,7 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(401);
     });
 
-    it('returns 400 when the ingredients are missing', async () => {
+    it('returns 400 when the ingredients are empty', async () => {
         const token = await loginAndGetAccessToken();
         const res = await createRecipe(token, { ingredients: [] });
         expect(res.status).toBe(400);
