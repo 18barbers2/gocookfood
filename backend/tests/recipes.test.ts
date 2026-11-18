@@ -80,4 +80,13 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(201);
         expect(res.body.author.username).toBe(validUser.username);
     });
+
+    it('returns 201 with only required fields', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await request(app)
+            .post('/api/recipes')
+            .send({ title: 'bread', ingredients: [{ name: 'flour' }] })
+            .set('Authorization', `Bearer ${token}`);
+        expect(res.status).toBe(201);
+    });
 });
