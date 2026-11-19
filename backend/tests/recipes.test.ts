@@ -146,7 +146,7 @@ describe('GET /api/recipes/:id', () => {
         const res = await createRecipe(token);
         const recipeId = res.body.id;
 
-        const valid = await getRecipe(token, recipeId);
+        const valid = await getRecipe(recipeId);
 
         expect(valid.status).toBe(200);
         expect(valid.body.title).toBe(validRecipe.title);
@@ -155,7 +155,7 @@ describe('GET /api/recipes/:id', () => {
     it('returns 404 when no recipe exists', async () => {
         const token = await loginAndGetAccessToken();
         await createRecipe(token);
-        const invalid = await getRecipe(token, 123123);
+        const invalid = await getRecipe(123123);
 
         expect(invalid.status).toBe(404);
     });
