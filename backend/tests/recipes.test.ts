@@ -188,7 +188,7 @@ describe('GET /api/recipes/:id', () => {
         expect(recipe.body.author).not.toHaveProperty('passwordHash');
     });
 
-    it('optional fields are null', async () => {
+    it('returns null for optional fields that were not provided', async () => {
         const token = await loginAndGetAccessToken();
         const res = await createRecipe(token, {
             description: undefined,
