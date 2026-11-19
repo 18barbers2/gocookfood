@@ -167,4 +167,15 @@ describe('GET /api/recipes/:id', () => {
 
         expect(invalid.status).toBe(400);
     });
+
+    it('returns ingredients in order', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token);
+        const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
+
+        expect(recipe.status).toBe(200);
+        expect(recipe.body.ingredients.map((i: { name: string }) => i.name)).toEqual(
+            validRecipe.ingredients.map((i) => i.name)
+        );
+    });
 });
