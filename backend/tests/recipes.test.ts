@@ -126,4 +126,10 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(400);
         expect(res.body.details[0].path).toEqual(['ingredients', 0, 'name']);
     });
+
+    it("returns 400 when steps isn\'t an array", async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token, { steps: 'this is a step as a string' });
+        expect(res.status).toBe(400);
+    });
 });
