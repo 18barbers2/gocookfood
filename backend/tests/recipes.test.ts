@@ -159,4 +159,12 @@ describe('GET /api/recipes/:id', () => {
 
         expect(invalid.status).toBe(404);
     });
+
+    it('returns 400 when no id invalid', async () => {
+        const token = await loginAndGetAccessToken();
+        await createRecipe(token);
+        const invalid = await request(app).get('/api/recipes/invalidId');
+
+        expect(invalid.status).toBe(400);
+    });
 });
