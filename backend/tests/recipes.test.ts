@@ -178,4 +178,11 @@ describe('GET /api/recipes/:id', () => {
             validRecipe.ingredients.map((i) => i.name)
         );
     });
+
+    it("doesn't leak password hash", async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token);
+        const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
+        expect(recipe.body.author).not.toHaveProperty('passwordHash');
+    });
 });
