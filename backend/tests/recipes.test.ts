@@ -133,3 +133,17 @@ describe('POST /api/recipes', () => {
         expect(res.status).toBe(400);
     });
 });
+
+describe('GET /api/recipes/:id', () => {
+    it('returns 200 with recipe', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token);
+        const recipeId = res.body.id;
+
+        const valid = await request(app)
+            .get(`/api/recipes/${recipeId}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(valid.status).toBe(200);
+    });
+});
