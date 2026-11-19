@@ -185,4 +185,12 @@ describe('GET /api/recipes/:id', () => {
         const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
         expect(recipe.body.author).not.toHaveProperty('passwordHash');
     });
+
+    it('optional fields are null', async () => {
+        const token = await loginAndGetAccessToken();
+        const res = await createRecipe(token);
+        const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
+        expect(recipe.body.ingredients[2].quantity).toBeNull();
+        expect(recipe.body.ingredients[2].unit).toBeNull();
+    });
 });
