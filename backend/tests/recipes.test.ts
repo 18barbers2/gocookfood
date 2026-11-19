@@ -149,5 +149,6 @@ describe('GET /api/recipes/:id', () => {
         const valid = await getRecipe(token, recipeId);
 
         expect(valid.status).toBe(200);
+        expect(valid.body.title).toBe(validRecipe.title);
     });
 });
