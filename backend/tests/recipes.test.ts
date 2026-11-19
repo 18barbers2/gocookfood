@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import prisma from '../src/lib/prisma.js';
-import { validUser, loginAndGetAccessToken, validRecipe, createRecipe } from './helpers.js';
+import {
+    validUser,
+    loginAndGetAccessToken,
+    validRecipe,
+    createRecipe,
+    getRecipe,
+} from './helpers.js';
 import request from 'supertest';
 import { app } from '../src/app.js';
 
@@ -140,9 +146,7 @@ describe('GET /api/recipes/:id', () => {
         const res = await createRecipe(token);
         const recipeId = res.body.id;
 
-        const valid = await request(app)
-            .get(`/api/recipes/${recipeId}`)
-            .set('Authorization', `Bearer ${token}`);
+        const valid = await getRecipe(token, recipeId);
 
         expect(valid.status).toBe(200);
     });

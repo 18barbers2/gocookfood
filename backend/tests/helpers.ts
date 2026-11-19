@@ -65,3 +65,7 @@ export function createRecipe(token: string, overrides = {}) {
         .send({ ...validRecipe, ...overrides })
         .set('Authorization', `Bearer ${token}`);
 }
+
+export function getRecipe(token: string, id: string) {
+    return request(app).get(`/api/recipes/${id}`).set('Authorization', `Bearer ${token}`);
+}
