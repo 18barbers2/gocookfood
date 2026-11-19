@@ -183,6 +183,8 @@ describe('GET /api/recipes/:id', () => {
         const token = await loginAndGetAccessToken();
         const res = await createRecipe(token);
         const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
+
+        expect(recipe.status).toBe(200);
         expect(recipe.body.author).not.toHaveProperty('passwordHash');
     });
 
@@ -190,6 +192,8 @@ describe('GET /api/recipes/:id', () => {
         const token = await loginAndGetAccessToken();
         const res = await createRecipe(token);
         const recipe = await request(app).get(`/api/recipes/${res.body.id}`);
+
+        expect(recipe.status).toBe(200);
         expect(recipe.body.ingredients[2].quantity).toBeNull();
         expect(recipe.body.ingredients[2].unit).toBeNull();
     });
