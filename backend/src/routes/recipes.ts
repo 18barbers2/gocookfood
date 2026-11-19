@@ -107,4 +107,29 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+const pageSchema = z.coerce.number().int().positive().default(1);
+const PAGE_SIZE = 20;
+
+router.get('/', async (req, res) => {
+    const page = pageSchema.safeParse(req.query.page);
+
+    if (!page.success) {
+        return res.status(400).json({ error: 'Could not get recipes', details: page.error.issues });
+    }
+
+    try {
+        const recipes = await prisma.recipe.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: { author: { select: { id: true, username: true } } },
+            take: PAGE_SIZE,
+            skip: (page.data - 1) * PAGE_SIZE,
+        });
+
+        return res.status(200).json(recipes);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 export default router;
