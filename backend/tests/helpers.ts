@@ -69,3 +69,7 @@ export function createRecipe(token: string, overrides = {}) {
 export function getRecipe(id: number) {
     return request(app).get(`/api/recipes/${id}`);
 }
+
+export function getRecipes() {
+    return request(app).get('/api/recipes/');
+}
