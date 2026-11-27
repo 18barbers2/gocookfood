@@ -6,6 +6,7 @@ import {
     validRecipe,
     createRecipe,
     getRecipe,
+    getRecipes,
 } from './helpers.js';
 import request from 'supertest';
 import { app } from '../src/app.js';
@@ -202,5 +203,16 @@ describe('GET /api/recipes/:id', () => {
         expect(recipe.body.description).toBeNull();
         expect(recipe.body.ingredients[0].quantity).toBeNull();
         expect(recipe.body.ingredients[0].unit).toBeNull();
+    });
+});
+
+describe('GET /api/recipes', () => {
+    it('returns a list of recipes', async () => {
+        const token = await loginAndGetAccessToken();
+        await createRecipe(token);
+        const res = await getRecipes();
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body).toHaveLength(1);
     });
 });
