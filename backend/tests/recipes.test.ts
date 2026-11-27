@@ -227,4 +227,11 @@ describe('GET /api/recipes', () => {
             Date.parse(res.body[1].createdAt)
         );
     });
+
+    it("doesn't leak the password hash", async () => {
+        const token = await loginAndGetAccessToken();
+        await createRecipe(token);
+        const res = await getRecipes();
+        expect(res.body[0].author).not.toHaveProperty('passwordHash');
+    });
 });
