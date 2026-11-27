@@ -15,6 +15,12 @@ export const validUser = {
     password: 'password123',
 };
 
+export const validUser2 = {
+    email: 'samothertest@test.com',
+    username: 'newuser101',
+    password: 'passwor321',
+};
+
 export const validRecipe = {
     title: 'Bacon and Eggs',
     description: 'A classic quick breakfast.',
@@ -55,6 +61,13 @@ export async function loginAndGetCookie() {
 export async function loginAndGetAccessToken() {
     await register();
     const login = await request(app).post('/api/auth/login').send(validUser);
+    const token = login.body.accessToken;
+    return token;
+}
+
+export async function loginAsOtherUser() {
+    await register(validUser2);
+    const login = await request(app).post('/api/auth/login').send(validUser2);
     const token = login.body.accessToken;
     return token;
 }

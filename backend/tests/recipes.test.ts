@@ -7,6 +7,7 @@ import {
     createRecipe,
     getRecipe,
     getRecipes,
+    loginAsOtherUser,
 } from './helpers.js';
 import request from 'supertest';
 import { app } from '../src/app.js';
@@ -233,5 +234,18 @@ describe('GET /api/recipes', () => {
         await createRecipe(token);
         const res = await getRecipes();
         expect(res.body[0].author).not.toHaveProperty('passwordHash');
+    });
+
+    it('allows different users to create recipes', async () => {
+        const token = await loginAndGetAccessToken();
+        const token2 = await loginAsOtherUser();
+
+        await createRecipe(token, { title: 'Recipe 1' });
+        await createRecipe(token2, { title: 'Recipe 2' });
+
+        const res = await getRecipes();
+
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(2);
     });
 });
