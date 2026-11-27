@@ -215,4 +215,16 @@ describe('GET /api/recipes', () => {
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body).toHaveLength(1);
     });
+
+    it('returns a list of recipes sorted by createdAt', async () => {
+        const token = await loginAndGetAccessToken();
+        await createRecipe(token, { title: 'Oldest Recipe' });
+        await createRecipe(token, { title: 'Newest Recipe' });
+        const res = await getRecipes();
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveLength(2);
+        expect(Date.parse(res.body[0].createdAt)).toBeGreaterThan(
+            Date.parse(res.body[1].createdAt)
+        );
+    });
 });
