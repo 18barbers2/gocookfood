@@ -248,4 +248,23 @@ describe('GET /api/recipes', () => {
         expect(res.status).toBe(200);
         expect(res.body.length).toBe(2);
     });
+
+    it('returns at most 20 recipes', async () => {
+        const token = await loginAndGetAccessToken();
+
+        for (let i = 0; i < 21; i++) {
+            await createRecipe(token, { title: `Recipe ${i}` });
+        }
+
+        const res = await getRecipes();
+
+        expect(res.status).toBe(200);
+        expect(res.body.length).toBe(20);
+
+        const res2 = await request(app)
+            .get('/api/recipes/?page=2')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(res2.body.length).toBe(1);
+    });
 });
